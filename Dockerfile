@@ -21,6 +21,7 @@ RUN mkdir -p /tmp \
     && cd /tmp \
     && set -x \
     && apt-get update \
+    && export DEBIAN_FRONTEND="noninteractive" \
     && echo "Install Dependencies..." \
     && apt-get install -y --no-install-recommends curl wget ca-certificates \
     && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
@@ -41,8 +42,8 @@ RUN mkdir -p /tmp \
     && echo "Download [Kibana]..." \
     && wget --progress=bar:force https://artifacts.elastic.co/downloads/kibana/kibana-$ELK_VERSION-amd64.deb \
     && wget --progress=bar:force https://artifacts.elastic.co/downloads/kibana/kibana-$ELK_VERSION-amd64.deb.sha512 \
-    && shasum -a 512 -c kibana-$ELK_VERSION.deb.sha512 \
-    && dpkg -i kibana-$ELK_VERSION.deb \
+    && shasum -a 512 -c kibana-$ELK_VERSION-amd64.deb.sha512 \
+    && dpkg -i kibana-$ELK_VERSION-amd64.deb \
     && echo "Clean Up..." \
     && rm -rf /tmp/* \
     && apt-get remove -y curl wget ca-certificates \
