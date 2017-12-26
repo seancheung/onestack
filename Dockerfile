@@ -46,5 +46,8 @@ RUN mkdir -p /tmp \
     && dpkg -i kibana-$ELK_VERSION-amd64.deb \
     && echo "Clean Up..." \
     && rm -rf /tmp/* \
-    && apt-get remove -y curl wget ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+ENV PATH /usr/share/elasticsearch/bin:$PATH
+ENV PATH /usr/share/logstash/bin:$PATH
+ENV PATH /usr/share/kibana/bin:$PATH
