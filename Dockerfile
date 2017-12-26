@@ -44,6 +44,11 @@ RUN mkdir -p /tmp \
     && wget --progress=bar:force https://artifacts.elastic.co/downloads/kibana/kibana-$ELK_VERSION-amd64.deb.sha512 \
     && shasum -a 512 -c kibana-$ELK_VERSION-amd64.deb.sha512 \
     && dpkg -i kibana-$ELK_VERSION-amd64.deb \
+    && bundled='NODE="${DIR}/node/bin/node"' \
+    && custom='NODE="/usr/bin/node"' \
+    && sed -i "s|$bundled|$custom|g" /usr/share/kibana/bin/kibana-plugin \
+	&& sed -i "s|$bundled|$custom|g" /usr/share/kibana/bin/kibana \
+    && rm -rf /usr/share/kibana/node \
     && echo "Clean Up..." \
     && rm -rf /tmp/* \
     && rm -rf /var/lib/apt/lists/*
@@ -51,3 +56,4 @@ RUN mkdir -p /tmp \
 ENV PATH /usr/share/elasticsearch/bin:$PATH
 ENV PATH /usr/share/logstash/bin:$PATH
 ENV PATH /usr/share/kibana/bin:$PATH
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
