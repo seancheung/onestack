@@ -49,6 +49,11 @@ RUN mkdir -p /tmp \
     && sed -i "s|$bundled|$custom|g" /usr/share/kibana/bin/kibana-plugin \
 	&& sed -i "s|$bundled|$custom|g" /usr/share/kibana/bin/kibana \
     && rm -rf /usr/share/kibana/node \
+    && echo "Clone and compile [su-exec]..." \
+    && git clone --depth=1 https://github.com/ncopa/su-exec.git /tmp/su-exec \
+    && make -C /tmp/su-exec \
+    && mv /tmp/su-exec/su-exec /sbin/su-exec \
+    && chmod +x /sbin/su-exec \
     && echo "Clean Up..." \
     && rm -rf /tmp/* \
     && rm -rf /var/lib/apt/lists/*
