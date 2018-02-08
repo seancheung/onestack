@@ -33,6 +33,7 @@ function ensure_dir()
         mkdir -p $dir
         chown www-data:www-data $dir
     done
+    mkdir -p /var/run/php
 }
 
 function boot_mysql()
