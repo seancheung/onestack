@@ -39,12 +39,12 @@ function boot_mysql()
 {
     bootfile=$1
     cat > $bootfile << EOF
-ALTER USER 'root'@'localhost' IDENTIFIED BY '';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';
 EOF
 
     if [ -n "$MYSQL_ROOT_PASSWORD" ]; then
         echo "[Mysql] updating root password"
-        echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' WITH GRANT OPTION;" >> $bootfile
+        echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}' WITH GRANT OPTION;" >> $bootfile
     fi
 
     # MYSQL_USER: "username:password" or "username". password will be the same as username if omitted.
