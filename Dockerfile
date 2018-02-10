@@ -1,81 +1,22 @@
-FROM seancheung/onestack:slim
+FROM seancheung/onestack:elk
 LABEL maintainer="Sean Cheung <theoxuanx@gmail.com>"
 
-ARG ELK_VERSION=6.1.1
-
-RUN mkdir -p /tmp \
-    && cd /tmp \
-    && set -x \
-    && echo "Install Dependencies..." \
+RUN set -x \
     && apt-get update \
-    && apt-get install -y --no-install-recommends openjdk-8-jre apache2-utils \
-	&& echo "Download [Elasticsearch]..." \
-    && wget --progress=bar:force https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ELK_VERSION.deb \
-    && wget --progress=bar:force https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ELK_VERSION.deb.sha512 \
-    && shasum -a 512 -c elasticsearch-$ELK_VERSION.deb.sha512 \
-    && dpkg -i elasticsearch-$ELK_VERSION.deb \
-    && echo "Download [Logstash]..." \
-    && wget --progress=bar:force https://artifacts.elastic.co/downloads/logstash/logstash-$ELK_VERSION.deb \
-    && wget --progress=bar:force https://artifacts.elastic.co/downloads/logstash/logstash-$ELK_VERSION.deb.sha512 \
-    && shasum -a 512 -c logstash-$ELK_VERSION.deb.sha512 \
-    && dpkg -i logstash-$ELK_VERSION.deb \
-    && echo "Download [Kibana]..." \
-    && wget --progress=bar:force https://artifacts.elastic.co/downloads/kibana/kibana-$ELK_VERSION-amd64.deb \
-    && wget --progress=bar:force https://artifacts.elastic.co/downloads/kibana/kibana-$ELK_VERSION-amd64.deb.sha512 \
-    && shasum -a 512 -c kibana-$ELK_VERSION-amd64.deb.sha512 \
-    && dpkg -i kibana-$ELK_VERSION-amd64.deb \
-    && bundled='NODE="${DIR}/node/bin/node"' \
-    && custom='NODE="/usr/bin/node"' \
-    && sed -i "s|$bundled|$custom|g" /usr/share/kibana/bin/kibana-plugin \
-	&& sed -i "s|$bundled|$custom|g" /usr/share/kibana/bin/kibana \
-    && rm -rf /usr/share/kibana/node \
-	&& echo "Download and compile [su-exec]..." \
-	&& mkdir su-exec \
-	&& curl -sL https://github.com/ncopa/su-exec/tarball/v0.2 | tar zx -C su-exec --strip-components=1 \
-	&& make -C /tmp/su-exec \
-	&& mv /tmp/su-exec/su-exec /sbin/su-exec \
-    && chmod +x /sbin/su-exec \
-    && for path in \
-		/var/run/elasticsearch \
-		/var/log/elasticsearch \
-		/var/opt/elasticsearch \
-	; do \
-	mkdir -p "$path"; \
-    chown elasticsearch:elasticsearch "$path"; \
-	done \
-    && for path in \
-		/var/run/logstash \
-		/var/log/logstash \
-		/var/opt/logstash \
-	; do \
-	mkdir -p "$path"; \
-    chown logstash:logstash "$path"; \
-	done \
-    && for path in \
-		/var/run/kibana \
-		/var/log/kibana \
-		/var/opt/kibana \
-	; do \
-	mkdir -p "$path"; \
-    chown kibana:kibana "$path"; \
-	done \
+    && echo "Install Dependencies..." \
+    && apt-get install -y php7.0-fpm \
+    && echo "phpmyadmin phpmyadmin/internal/skip-preseed boolean true" | debconf-set-selections \
+    && echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect" | debconf-set-selections \
+    && echo "phpmyadmin phpmyadmin/dbconfig-install boolean false" | debconf-set-selections \
+    && apt-get install -y --no-install-recommends phpmyadmin \
+    && sed -i '110s#^#$cfg["Servers"][$i]["auth_type"] = "config";\n$cfg["Servers"][$i]["username"] = "root";\n$cfg["Servers"][$i]["password"] = "";\n$cfg["Servers"][$i]["AllowNoPassword"] = TRUE;\n#' /etc/phpmyadmin/config.inc.php \
+    && echo "listen=/var/run/php7.0-fpm.sock" >> /etc/php/7.0/fpm/php-fpm.conf \
+	&& mkdir -p /var/run/php \
+    && npm -g i mongo-express redis-commander \
     && echo "Clean Up..." \
-	&& rm -rf /tmp/* \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PATH /usr/share/elasticsearch/bin:$PATH
-ENV PATH /usr/share/logstash/bin:$PATH
-ENV PATH /usr/share/kibana/bin:$PATH
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
-ENV ES_JAVA_OPTS "-Xms512m -Xmx512m"
+COPY supervisor /etc/supervisor/conf.d/
+COPY phpmyadmin.conf /etc/nginx/sites-enabled/
 
-COPY entrypoint.sh /entrypoint-elk.sh
-COPY elk.conf /etc/supervisor/conf.d/
-COPY log4js.conf /var/opt/logstash/
-COPY kibana.conf /etc/nginx/sites-enabled/
-
-VOLUME ["/var/opt/elasticsearch", "/var/opt/logstash"]
-EXPOSE 80 9200 5000/udp
-
-ENTRYPOINT ["/entrypoint-elk.sh"]
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+EXPOSE 8080 8081 8082
