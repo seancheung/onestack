@@ -42,6 +42,7 @@ RUN set -x \
 	mkdir -p "$path"; \
     chown www-data:www-data "$path"; \
 	done \
+	&& rm /etc/nginx/sites-enabled/default \
     && echo "Clean Up..." \
     && rm -rf /var/lib/apt/lists/*
 
