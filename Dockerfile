@@ -1,4 +1,4 @@
-FROM seancheung/onestack:slim
+FROM seancheung/onestack:slim-8
 LABEL maintainer="Sean Cheung <theoxuanx@gmail.com>"
 
 ARG ELK_VERSION=6.1.1
