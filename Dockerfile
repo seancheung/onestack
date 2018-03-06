@@ -1,20 +1,25 @@
 FROM ubuntu:16.04
 LABEL maintainer="Sean Cheung <theoxuanx@gmail.com>"
 
+ARG MONGO_VERSION=3.6.3
 ARG NODE_VERSION=v9.5.0
 
 RUN set -x \
     && apt-get update \
     && export DEBIAN_FRONTEND="noninteractive" \
     && echo "Install Dependencies..." \
-    && apt-get install -y --no-install-recommends curl wget ca-certificates \
-    && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5 \
-    && echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.6 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.6.list \
     && apt-get update \
-    && apt-get install -y --no-install-recommends mongodb-org redis-server mysql-server mysql-client bash openssl supervisor nginx python make g++ \
+    && apt-get install -y --no-install-recommends curl wget ca-certificates redis-server mysql-server mysql-client bash openssl supervisor nginx python make g++ \
 	&& mkdir -p /tmp \
-	&& wget -O /tmp/node.tar.gz https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.gz \
-	&& tar -zxvf /tmp/node.tar.gz -C /tmp \
+	&& echo "Downloading mongodb $MONGO_VERSION..." \
+	&& wget -O /tmp/mongodb.tar.gz https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGO_VERSION}.tgz \
+	&& tar -zxvf /tmp/mongodb.tar.gz -C /tmp \
+	&& cp -r /tmp/mongodb-linux-x86_64-${MONGO_VERSION}/bin/* /usr/bin \
+	&& groupadd -r mongodb \
+	&& useradd -r -s /bin/false -g mongodb mongodb \
+	&& echo "Downloading nodejs $NODE_VERSION..." \
+	&& wget -O /tmp/nodejs.tar.gz https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.gz \
+	&& tar -zxvf /tmp/nodejs.tar.gz -C /tmp \
 	&& cp -r /tmp/node-${NODE_VERSION}-linux-x64/bin/* /usr/bin/ \
 	&& cp -r /tmp/node-${NODE_VERSION}-linux-x64/include/* /usr/include/ \
 	&& cp -r /tmp/node-${NODE_VERSION}-linux-x64/lib/* /usr/lib/ \
