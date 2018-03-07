@@ -29,12 +29,6 @@ RUN mkdir -p /tmp \
     && sed -i "s|$bundled|$custom|g" /usr/share/kibana/bin/kibana-plugin \
 	&& sed -i "s|$bundled|$custom|g" /usr/share/kibana/bin/kibana \
     && rm -rf /usr/share/kibana/node \
-	&& echo "Download and compile [su-exec]..." \
-	&& mkdir su-exec \
-	&& curl -sL https://github.com/ncopa/su-exec/tarball/v0.2 | tar zx -C su-exec --strip-components=1 \
-	&& make -C /tmp/su-exec \
-	&& mv /tmp/su-exec/su-exec /sbin/su-exec \
-    && chmod +x /sbin/su-exec \
     && for path in \
 		/var/run/elasticsearch \
 		/var/log/elasticsearch \
