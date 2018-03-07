@@ -10,20 +10,26 @@ RUN set -x \
     && echo "Install Dependencies..." \
     && apt-get update \
     && apt-get install -y --no-install-recommends curl wget ca-certificates redis-server mysql-server mysql-client bash openssl supervisor nginx python make g++ \
-	&& mkdir -p /tmp \
-	&& echo "Downloading mongodb $MONGO_VERSION..." \
-	&& wget -O /tmp/mongodb.tar.gz https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGO_VERSION}.tgz \
-	&& tar -zxvf /tmp/mongodb.tar.gz -C /tmp \
-	&& cp -r /tmp/mongodb-linux-x86_64-${MONGO_VERSION}/bin/* /usr/bin \
+	&& echo "Downloading [mongodb $MONGO_VERSION]..." \
+	&& mkdir -p /tmp/mongodb \
+	&& curl -sL https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGO_VERSION}.tgz | tar zx -C /tmp/mongodb --strip-components=1 \
+	&& cp -r /tmp/mongodb/bin/* /usr/bin \
 	&& groupadd -r mongodb \
 	&& useradd -r -s /bin/false -g mongodb mongodb \
-	&& echo "Downloading nodejs $NODE_VERSION..." \
-	&& wget -O /tmp/nodejs.tar.gz https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.gz \
-	&& tar -zxvf /tmp/nodejs.tar.gz -C /tmp \
-	&& cp -r /tmp/node-${NODE_VERSION}-linux-x64/bin/* /usr/bin/ \
-	&& cp -r /tmp/node-${NODE_VERSION}-linux-x64/include/* /usr/include/ \
-	&& cp -r /tmp/node-${NODE_VERSION}-linux-x64/lib/* /usr/lib/ \
-	&& cp -r /tmp/node-${NODE_VERSION}-linux-x64/share/* /usr/share/ \
+	&& echo "Downloading [nodejs $NODE_VERSION]..." \
+	&& mkdir -p /tmp/nodejs \
+	&& curl -sL https://nodejs.org/dist/v9.5.0/node-v9.5.0-linux-x64.tar.gz | tar zx -C /tmp/nodejs --strip-components=1 \
+	&& cp -r /tmp/nodejs/bin/* /usr/bin/ \
+	&& cp -r /tmp/nodejs/include/* /usr/include/ \
+	&& cp -r /tmp/nodejs/lib/* /usr/lib/ \
+	&& cp -r /tmp/nodejs/share/* /usr/share/ \
+	&& echo "Download and compile [su-exec]..." \
+	&& mkdir -p /tmp/su-exec \
+	&& curl -sL https://github.com/ncopa/su-exec/tarball/v0.2 | tar zx -C /tmp/su-exec --strip-components=1 \
+	&& make -C /tmp/su-exec \
+	&& mv /tmp/su-exec/su-exec /sbin/su-exec \
+	&& chmod +x /sbin/su-exec \
+	&& echo "Initializing directories..." \
     && for path in \
 		/var/run/mysqld \
 		/var/log/mysql \
