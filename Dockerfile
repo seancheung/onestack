@@ -18,7 +18,7 @@ RUN set -x \
 	&& useradd -r -s /bin/false -g mongodb mongodb \
 	&& echo "Downloading [nodejs $NODE_VERSION]..." \
 	&& mkdir -p /tmp/nodejs \
-	&& curl -sL https://nodejs.org/dist/v9.5.0/node-v9.5.0-linux-x64.tar.gz | tar zx -C /tmp/nodejs --strip-components=1 \
+	&& curl -sL https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-linux-x64.tar.gz | tar zx -C /tmp/nodejs --strip-components=1 \
 	&& cp -r /tmp/nodejs/bin/* /usr/bin/ \
 	&& cp -r /tmp/nodejs/include/* /usr/include/ \
 	&& cp -r /tmp/nodejs/lib/* /usr/lib/ \
