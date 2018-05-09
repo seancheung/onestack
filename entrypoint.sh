@@ -68,8 +68,12 @@ EOF
     mysqld --initialize --user=mysql --datadir=/var/opt/mysql --character-set-server=utf8 --log-error=/var/log/mysql/mysqld.log
 }
 
-if [ ! -f "$MYSQL_INITSQL" ] && [ -z "$MYSQL_SKIP_INIT" ]; then
-    boot_mysql "$MYSQL_INITSQL"
+if [ ! -f "$MYSQL_INITSQL" ]; then
+    if [ -z "$MYSQL_SKIP_INIT" ]; then
+        boot_mysql "$MYSQL_INITSQL"
+    else
+        touch "$MYSQL_INITSQL"
+    fi
 fi
 
 exec "$@"
