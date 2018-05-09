@@ -66,7 +66,7 @@ RUN set -x \
 	&& rm -rf /tmp/* \
     && rm -rf /var/lib/apt/lists/*
 
-COPY supervisord.conf /etc/
+COPY supervisord.conf /etc/supervisor/
 COPY supervisor /etc/supervisor/conf.d/
 COPY entrypoint.sh /entrypoint.sh
 
@@ -74,4 +74,4 @@ VOLUME ["/var/opt/mysql", "/var/opt/redis", "/var/opt/mongodb", "/etc/supervisor
 EXPOSE 3306 6379 27017
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
